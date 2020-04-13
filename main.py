@@ -1,6 +1,7 @@
 from random import randint
 import time
 from signal import signal, SIGINT
+import sys, getopt
 from sys import exit
 
 from runners import Runner
@@ -8,16 +9,18 @@ from runners import Runner
 
 class Race:
     
-    def __init__(self, num_runners, race_length):
+    def __init__(self, num_runners, race_length, results_path):
         """
         Initializes the class
         
         Args:
             (num_runners : int) The number of runners in the race
             (race_length : int) The length in meters of the race
+            (results_path : str) Path to the file where we want to store the results
         """
-        self.num_runners = num_runners
-        self.race_length = race_length
+        self.num_runners = int(num_runners)
+        self.race_length = int(race_length)
+        self.results_path = results_path
         
         self.runners = []
         self.tracks = []
@@ -66,9 +69,13 @@ class Race:
             else:
                 for track in self.tracks:
                     self.__print_track(track)
-                print("\n\n\n\n")
+                print("\n\n\n\n\n\n")
              
             time.sleep(0.05)
+        
+        for track in self.tracks:
+            self.__print_track(track)
+        print("\n\n\n\n\n\n")
         
         result = {
             'positions' : positions,
@@ -77,14 +84,13 @@ class Race:
         
         self.results.append(result)
             
-    def __save_results(self, path):
+    def save_results(self):
         """
         Saves the results of all races on the specified route
-        
-        Args:
-            (path : str) Indicates the file path where you want to save the results. Needs a file name
         """
-        with open(path, 'w') as results_file:
+        print("\nSaving results in: " + self.results_path + "\n")
+        
+        with open(self.results_path, 'w') as results_file:
             num_carrera = 0
             for result in self.results:
                 num_carrera += 1
@@ -112,19 +118,46 @@ class Race:
         """
         Handles what the program should do when it receives SIGINT (ctrl+C)
         """
-        self.__save_results('results.txt')
+        if len(self.results) != 0:
+            self.save_results()
         print("\nSEE YOU SOON!\n")
         exit(0)
 
 
 
-def main():
-    race = Race(3, 20)
-    signal(SIGINT, race.handler)
-    while(True):
-        race.restart()
+def main(argv):
+    num_runners = 3
+    track_size = 100
+    loop = False
+    path = ""
     
+    try: 
+        opts, args = getopt.getopt(argv,"n:t:lp:")
+        
+        for opt, arg in opts:
+            if opt in ("-l"):
+                loop = True
+            elif opt in ("-n"):
+                num_runners = arg
+            elif opt in ("-t"):
+                track_size = arg
+            elif opt in ("-p"):
+                path = arg
+    except:
+        print("Something went wrong handling arguments")
+        exit(0)
+    
+    
+    race = Race(num_runners, track_size, path)
+    signal(SIGINT, race.handler)
+    
+    if loop:
+        while(True):
+            race.restart()
+    else:
+        race.restart()
+        race.save_results()
     
     
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1:])
