@@ -21,4 +21,5 @@ class Runner:
             
     def restart(self):
         self.progress = 0
+        self.finished = False
         
