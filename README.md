@@ -1,2 +1,2 @@
 # pyrace
-A little script that generates careers.
+A little script that generates races.
