@@ -1,41 +1,16 @@
-import time
-import sys
-from random import randint
+import tkinter as tk
+from tkinter import filedialog, Text
+import os
 
+root = tk.Tk()
 
+canvas = tk.Canvas(root, height=800, width=800, bg="#263D42")
+canvas.pack()
 
-import colorama
-colorama.init()
-    
-def move_cursor(x,y):
-    print ("\x1b[{};{}H".format(y+1,x+1))
-    
-def clear():
-    print ("\x1b[2J")
-    
-clear()
-move_cursor(0,0)
+frame = tk.Frame(root, bg="white")
+frame.place(relwidth=0.9, relheight=0.9, relx=0.05, rely=0.05)
 
+openFile = tk.Button(root, text="Open File", padx=10, pady=5,
+                     fg="white", bg="#263D42")
 
-
-
-size = 30
-pistas = []
-
-for i in range(0,3):
-    pista = []
-    for i in range (0,size):
-        pista.append("_")
-    pistas.append(pista)
-
-for i in range(0,3):
-    time.sleep(1)
-    clear()
-    move_cursor(0,0)
-    randid = randint(0,2)
-    pistas[randid][i] = "#"
-    for pista in pistas:
-        for metre in pista:
-            print(metre, end='')
-        print("\n")
-
+root.mainloop()
