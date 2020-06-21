@@ -4,6 +4,8 @@ from signal import signal, SIGINT
 import sys, getopt
 from sys import exit
 from os import path
+import turtle
+from turtle import Turtle
 
 from runners import Runner
 import utils
@@ -162,6 +164,28 @@ class Race:
                           save results file.""".format(self.results_path))
         print("\nSEE YOU SOON!\n")
         exit(0)
+
+class TurtleRace:
+
+    def __init__(self, num_runners, race_length, results_path, loop):
+        """
+        Initializes the class
+
+        Args:
+            (num_runners : int) The number of runners in the race
+            (race_length : int) The length in meters of the race
+            (results_path : str) Path to the file where we want to
+                                store the results
+            (loop : bool) True if endless races.
+        """
+        self.num_runners = int(num_runners)
+        self.results_path = results_path
+        self.loop = loop
+
+        self.runners = []
+
+        self.finished = 0
+        self.results = []
 
 
 def main(argv):
