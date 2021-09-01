@@ -1,18 +1,46 @@
-from random import randint
-import time
-from signal import signal, SIGINT
-import sys, getopt
-from sys import exit
-from os import path
-import turtle
-from turtle import Turtle
+##########################################################################
+#                                pyrace                                  #
+##########################################################################
+#                                                                        #
+#   Version: 0.1                                                         #
+#                                                                        #
+#   github: @Alburrito                                                   #
+#   mail: almarlop98@gmail.com                                           #
+#                                                                        #
+##########################################################################
+#                                                                        #
+#   TODO:                                                                #
+#       · Background                                                     #
+#       · Personalized turtles                                           #
+#       · Basic working                                                  #
+#       · resources.py                                                   #
+#                                                                        #
+##########################################################################
 
-from runners import Runner
-import utils
+
+
+from random import randint, choice
+from signal import signal, SIGINT
+import sys
+from sys import exit
+import getopt
+from os import path
+import time
+
+import turtle
+
+from runners import *
+from resources import *
+
+
+SCREENWIDTH = 2000
+SCREENHEIGTH = 700
+
+##########################################################################
 
 
 class Race:
-
+   
     def __init__(self, num_runners, race_length, results_path, loop):
         """
         Initializes the class
@@ -30,126 +58,76 @@ class Race:
         self.loop = loop
 
         self.runners = []
-        self.tracks = []
 
         self.finished = 0
         self.results = []
 
-    def __create_race(self):
+    def __create_screen(self):
         """
-        Restart the runners and their respective tracks
+
         """
-        for runner in range(0, self.num_runners):
-            self.runners.append(Runner(runner, self.race_length))
-            self.tracks.append([])
-            # View
-            for i in range(0, self.race_length):
-                self.tracks[runner].append("_")
+        self.screen = turtle.Screen()
+        self.screen.setup(SCREENWIDTH, SCREENHEIGTH)
+       # self.screen.cv.__rootwindow.resizable(False,False)
+        self.screen.bgcolor("black")
+        # NOTA: Creo que hay una ventana y dentro un canvas
+        self.screen.bgpic("resources/conConchas.png")
 
-    def __print_track(self, track):
+        
+
+
+
+    def __restart(self, x_start):
         """
-        Shows the status of the track provided as an argument
 
-        Args:
-            (track : list) The list that makes the visual representation of
-            the track
-        """
-        for i in track:
-            print(i, end='')
-        print("")
-
-    def __start_race(self):
-        """
-        A race that lasts until all the runners reach the finish begins
-        """
-        positions = []
-        times = []
-        start_time = time.time()
-
-        while (self.finished < self.num_runners):
-            randID = randint(0, self.num_runners-1)
-            progress = self.runners[randID].advance()
-            self.tracks[randID][progress-1] = "#"
-
-            if progress == self.race_length:
-                positions.append(randID)
-                times.append(time.time()-start_time)
-                self.finished += 1
-            else:
-                # VISTA
-                utils.full_clear()
-                for track in self.tracks:
-                    self.__print_track(track)
-
-            time.sleep(0.05)
-
-        # VISTA
-        utils.full_clear()
-        for track in self.tracks:
-            self.__print_track(track)
-
-        result = {
-            'positions': positions,
-            'times': times
-        }
-
-        self.results.append(result)
-
-    def __save_results(self):
-        """
-        Saves the results of all races on the specified route
-        """
-        with open(self.results_path, 'w') as results_file:
-            print("Saving results in: " + self.results_path)
-            num_carrera = 0
-            for result in self.results:
-                num_carrera += 1
-                pos = 0
-                results_file.write("           RACE " + str(num_carrera)
-                                   + " (" + str(self.race_length) + "m)"
-                                   + "\n")
-                results_file.write("------------------------\n")
-                results_file.write("POSITION".ljust(10) + "RUNNER".ljust(9)
-                                   + "TIME\n")
-                for p, t in zip(result['positions'], result['times']):
-                    pos += 1
-                    results_file.write((str(pos) + "º").center(7)
-                                       + str(p).center(12)
-                                       + str(t)[:5] + "\n")
-                results_file.write("\n\n")
-
-    def __restart(self):
-        """
-        Restarts the race
         """
         self.finished = 0
+        time.sleep(1)
+        self.screen.clear()
+
         for runner in self.runners:
-            runner.restart()
-            # View
-            self.tracks[runner.id] = []
-            for i in range(0, self.race_length):
-                self.tracks[runner.id].append("_")
-        self.__start_race()
+            runner.restart(x_start, runner.get_y())
 
     def start(self):
         """
 
         """
-        self.__create_race()
-        self.__start_race()
+        positions = []
+        times = []
+        start_time = time.time()
 
-        if self.loop is True:
-            while True:
-                self.__restart()
-        else:
-            utils.full_clear()
-            if self.results_path != "":
-                try:
-                    self.__save_results()
-                except Exception:
-                    raise ValueError("""ERROR: Wrong path to results file.
-                                     Could not save results file.""")
+        self.__create_screen()
 
+        x_start = -self.screen.screensize()[0]
+        y_start = self.screen.screensize()[1]
+        y = y_start
+
+
+        # Create runners
+        for i in range(1,self.num_runners+1):
+            runner_color = choice(COLORS)
+            runner = Runner(i, color=runner_color) # speed=, color=
+            runner.restart(x_start, y)
+            y = y - (self.screen.screensize()[1]*2)/(self.num_runners - 1)
+            self.runners.append(runner)
+
+        time.sleep(3)
+
+        while self.finished < self.num_runners:
+            # Get random id and advance randomly
+            runner_id = randint(0,self.num_runners-1)
+            if self.runners[runner_id].finished:
+                continue
+            else:
+                self.runners[runner_id].advance(randint(1,3))
+                if self.runners[runner_id].get_x() >= self.screen.screensize()[0]: # Finished runner
+                    self.runners[runner_id].finished = True
+                    self.finished += 1
+                
+                if self.finished == self.num_runners: # Finished race
+                    if self.loop:
+                        self.__restart(x_start)
+            
     def handler(self, signal_received, frame):
         """
         Handles what the program should do when it receives SIGINT (ctrl+C)
@@ -165,32 +143,9 @@ class Race:
         print("\nSEE YOU SOON!\n")
         exit(0)
 
-class TurtleRace:
-
-    def __init__(self, num_runners, race_length, results_path, loop):
-        """
-        Initializes the class
-
-        Args:
-            (num_runners : int) The number of runners in the race
-            (race_length : int) The length in meters of the race
-            (results_path : str) Path to the file where we want to
-                                store the results
-            (loop : bool) True if endless races.
-        """
-        self.num_runners = int(num_runners)
-        self.results_path = results_path
-        self.loop = loop
-
-        self.runners = []
-
-        self.finished = 0
-        self.results = []
-
-
 def main(argv):
     # Default parameters
-    num_runners = 3
+    num_runners = 5
     track_size = 100
     loop = False
     save_path = ""
@@ -208,18 +163,17 @@ def main(argv):
             elif opt in ("-s"):  # Save results
                 save_path = arg
             elif opt in ("-f"):  # Fast start (testing comfort)
-                track_size = 25
                 loop = True
-                save_path = "results/fast_results.txt"
+                # TODO: check path dir
+                #save_path = "results/fast_results.txt"
 
     except Exception:
         print("Something went wrong handling arguments")
         exit(0)
 
     race = Race(num_runners, track_size, save_path, loop)
-    signal(SIGINT, race.handler)
+   # signal(SIGINT, race.handler)
     race.start()
-
 
 if __name__ == '__main__':
     main(sys.argv[1:])

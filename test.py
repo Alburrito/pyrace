@@ -1,16 +1,15 @@
-import tkinter as tk
-from tkinter import filedialog, Text
-import os
+import time
+from random import randint 
+runners = 5
 
-root = tk.Tk()
 
-canvas = tk.Canvas(root, height=800, width=800, bg="#263D42")
-canvas.pack()
+class Father():
 
-frame = tk.Frame(root, bg="white")
-frame.place(relwidth=0.9, relheight=0.9, relx=0.05, rely=0.05)
+    def __init__(self, p1):
+        self.p1 = p1
+        self.test = "testeo"
 
-openFile = tk.Button(root, text="Open File", padx=10, pady=5,
-                     fg="white", bg="#263D42")
 
-root.mainloop()
+class Child(Father):
+    def __init__(self,p1):
+        super()

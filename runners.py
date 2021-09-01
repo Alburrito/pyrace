@@ -4,20 +4,34 @@ class Runner:
 
     def __init__(self, runner_id, speed=0, color='black'):
         self.runner_id = runner_id
+        self.finished = False
         self.runner= Turtle()
         self.runner.speed(speed)
-        self.runner.color = color
+        self.runner.color(color)
+        self.runner.shape("turtle")
+        self.test = "hola"
 
     def advance(self, length):
         self.runner.forward(length)
 
     def restart(self, x, y):
+        self.finished = False
+        self.runner.penup()
         self.runner.goto(x,y)
+        self.runner.pendown()
 
     def get_x(self):
         return self.runner.xcor()
     
     def get_y(self):
         return self.runner.ycor()
+
+class TurtleRunner(Runner):
+
+    def __init_(self, runner_id, speed=0, color='black'):
+        super(runner_id, speed, color)
+        super.runner.shape("turtle")
+
+
 
     
