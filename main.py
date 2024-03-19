@@ -19,23 +19,18 @@
 
 from typing import List
 import getopt
-from random import choice, randint
+from random import randint
 import sys
 import time
 import turtle
 
-from constants import COLORS
-from runners import Runner
+from runners import Runner, TurtleRunner
+from utils import get_next_color, TITLE, IMG_PATH, SOUND_PATH, SCREENWIDTH, SCREENHEIGHT
 
 ##########################################################################
 
 
 class Race:
-
-    SCREENWIDTH = 800
-    SCREENHEIGTH = 600
-    TITLE = "TURTLES RACE!"
-    BG_IMG_PATH = "resources/bg_no_shells.png"
    
     def __init__(self, num_runners: int, race_length: int):
         """
@@ -45,62 +40,65 @@ class Race:
             (num_runners : int) The number of runners in the race
             (race_length : int) The length in meters of the race
         """
+        # Race parameters
         self.num_runners: int = num_runners
         self.runners: List[Runner] = []
         self.finished: bool = False
 
         # Right-Left and Top-Down margins. (Distances)
-        self.rl_margin: int = self.SCREENWIDTH - race_length
+        self.rl_margin: int = SCREENWIDTH - race_length
         self.td_margin: int = 150
         # Track dimensions
         self.track_width: int = race_length
-        self.track_height: int = self.SCREENHEIGTH - self.td_margin
+        self.track_height: int = SCREENHEIGHT - self.td_margin
         self.space_between_runners: int = int(self.track_height / (self.num_runners - 1))
         # Track coordinates
         self.track_start: int = int(-self.track_width/2)
         self.track_end:int = int(self.track_width/2)
-        
-    def __create_screen(self):
-        """
-        """
+
+        # Screen
         self.screen = turtle.Screen()
-        self.screen.setup(self.SCREENWIDTH, self.SCREENHEIGTH)
-        # Countdown images
-        self.screen.register_shape("resources/3.gif")
-        self.screen.register_shape("resources/2.gif")
-        self.screen.register_shape("resources/1.gif")
-        self.screen.register_shape("resources/go.gif")
+        self.screen.setup(SCREENWIDTH, SCREENHEIGHT)
         # Screen settings
-        self.screen.title(self.TITLE)
+        self.screen.title(TITLE)
         self.screen.bgcolor("black")
-        self.screen.bgpic(self.BG_IMG_PATH)
+        self.screen.bgpic(f"{IMG_PATH}/bg_shells.png")
+
+        # Countdown images
+        self.screen.register_shape(f"{IMG_PATH}/3.gif")
+        self.screen.register_shape(f"{IMG_PATH}/2.gif")
+        self.screen.register_shape(f"{IMG_PATH}/1.gif")
+        self.screen.register_shape(f"{IMG_PATH}/go.gif")
+        # Turtle images
+        self.screen.register_shape(f"{IMG_PATH}/turtle_red.gif")
+        self.screen.register_shape(f"{IMG_PATH}/turtle_yellow.gif")
+        self.screen.register_shape(f"{IMG_PATH}/turtle_green.gif")
+        self.screen.register_shape(f"{IMG_PATH}/turtle_blue.gif")
     
     def __start_countdown(self):
         """
         """
         for i in range(3, 0, -1):
-            print(i)
-            turtle.shape(f"resources/{i}.gif")
+            turtle.shape(f"{IMG_PATH}/{i}.gif")
             time.sleep(1)
             turtle.shape("blank")
-        turtle.shape(f"resources/go.gif")
-        print("GO!")
+        turtle.shape(f"{IMG_PATH}/go.gif")
         time.sleep(0.5)
         turtle.shape("blank")
 
     def start(self):
         """
         """
-        self.__create_screen()
-
+        # Define starting point
         x_start = self.track_start
         y_start = self.track_height/2
         y = y_start
 
         # Create runners
+        color_generator = get_next_color()
         for runner_id in range(1, self.num_runners+1):
-            runner_color = choice(COLORS)
-            runner = Runner(runner_id, color=runner_color)
+            runner_color = next(color_generator)
+            runner = TurtleRunner(runner_id, color=runner_color)
             runner.restart(x_start, y)
             y = y - self.space_between_runners
             self.runners.append(runner)
@@ -123,11 +121,11 @@ class Race:
                         print(f"Runner {runner.runner_id} has finished!")
             self.finished = all(runner.finished for runner in self.runners)
 
-        turtle.mainloop()
+        turtle.done()
 
 def main(argv):
     # Default parameters
-    num_runners = 5
+    num_runners = 4
     track_size = 700
 
     try:

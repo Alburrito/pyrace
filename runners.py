@@ -1,5 +1,7 @@
 from turtle import Turtle
 
+from utils import IMG_PATH
+
 class Runner:
 
     def __init__(self, runner_id:int, speed=0, color='black'):
@@ -27,9 +29,9 @@ class Runner:
 
 class TurtleRunner(Runner):
 
-    def __init__(self, runner_id, speed=0, color='black'):
+    def __init__(self, runner_id, speed=0, color='red'):
         super().__init__(runner_id, speed, color)
-        self.runner.shape("turtle")
+        self.runner.shape(f"{IMG_PATH}/turtle_{color}.gif")
 
 
 
