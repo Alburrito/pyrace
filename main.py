@@ -17,163 +17,137 @@
 #                                                                        #
 ##########################################################################
 
-
-
-from random import randint, choice
-from signal import signal, SIGINT
-import sys
-from sys import exit
+from typing import List
 import getopt
-from os import path
+from random import choice, randint
+import sys
 import time
-
 import turtle
 
-from runners import *
-from resources import *
-
-
-SCREENWIDTH = 2000
-SCREENHEIGTH = 700
+from constants import COLORS
+from runners import Runner
 
 ##########################################################################
 
 
 class Race:
+
+    SCREENWIDTH = 800
+    SCREENHEIGTH = 600
+    TITLE = "TURTLES RACE!"
+    BG_IMG_PATH = "resources/bg_no_shells.png"
    
-    def __init__(self, num_runners, race_length, results_path, loop):
+    def __init__(self, num_runners: int, race_length: int):
         """
         Initializes the class
 
         Args:
             (num_runners : int) The number of runners in the race
             (race_length : int) The length in meters of the race
-            (results_path : str) Path to the file where we want to
-                                store the results
-            (loop : bool) True if endless races.
         """
-        self.num_runners = int(num_runners)
-        self.race_length = int(race_length)
-        self.results_path = results_path
-        self.loop = loop
+        self.num_runners: int = num_runners
+        self.runners: List[Runner] = []
+        self.finished: bool = False
 
-        self.runners = []
-
-        self.finished = 0
-        self.results = []
-
+        # Right-Left and Top-Down margins. (Distances)
+        self.rl_margin: int = self.SCREENWIDTH - race_length
+        self.td_margin: int = 150
+        # Track dimensions
+        self.track_width: int = race_length
+        self.track_height: int = self.SCREENHEIGTH - self.td_margin
+        self.space_between_runners: int = int(self.track_height / (self.num_runners - 1))
+        # Track coordinates
+        self.track_start: int = int(-self.track_width/2)
+        self.track_end:int = int(self.track_width/2)
+        
     def __create_screen(self):
         """
-
         """
         self.screen = turtle.Screen()
-        self.screen.setup(SCREENWIDTH, SCREENHEIGTH)
-       # self.screen.cv.__rootwindow.resizable(False,False)
+        self.screen.setup(self.SCREENWIDTH, self.SCREENHEIGTH)
+        # Countdown images
+        self.screen.register_shape("resources/3.gif")
+        self.screen.register_shape("resources/2.gif")
+        self.screen.register_shape("resources/1.gif")
+        self.screen.register_shape("resources/go.gif")
+        # Screen settings
+        self.screen.title(self.TITLE)
         self.screen.bgcolor("black")
-        # NOTA: Creo que hay una ventana y dentro un canvas
-        self.screen.bgpic("resources/conConchas.png")
-
-        
-
-
-
-    def __restart(self, x_start):
+        self.screen.bgpic(self.BG_IMG_PATH)
+    
+    def __start_countdown(self):
         """
-
         """
-        self.finished = 0
-        time.sleep(1)
-        self.screen.clear()
-
-        for runner in self.runners:
-            runner.restart(x_start, runner.get_y())
+        for i in range(3, 0, -1):
+            print(i)
+            turtle.shape(f"resources/{i}.gif")
+            time.sleep(1)
+            turtle.shape("blank")
+        turtle.shape(f"resources/go.gif")
+        print("GO!")
+        time.sleep(0.5)
+        turtle.shape("blank")
 
     def start(self):
         """
-
         """
-        positions = []
-        times = []
-        start_time = time.time()
-
         self.__create_screen()
 
-        x_start = -self.screen.screensize()[0]
-        y_start = self.screen.screensize()[1]
+        x_start = self.track_start
+        y_start = self.track_height/2
         y = y_start
 
-
-        # Create runners
-        for i in range(1,self.num_runners+1):
+        # Create runners
+        for runner_id in range(1, self.num_runners+1):
             runner_color = choice(COLORS)
-            runner = Runner(i, color=runner_color) # speed=, color=
+            runner = Runner(runner_id, color=runner_color)
             runner.restart(x_start, y)
-            y = y - (self.screen.screensize()[1]*2)/(self.num_runners - 1)
+            y = y - self.space_between_runners
             self.runners.append(runner)
+        
+        time.sleep(1)
+        
+        # Start countdown
+        self.__start_countdown()
 
-        time.sleep(3)
+        # Start
+        while not self.finished:
+            for runner in self.runners:
+                # If the runner has not finished, advance randomly
+                if not runner.finished:
+                    advance = randint(1, 5)
+                    runner.advance(advance)
+                    # If the runner is at the end of the track, finish
+                    if runner.get_x() >= self.track_end:
+                        runner.finished = True
+                        print(f"Runner {runner.runner_id} has finished!")
+            self.finished = all(runner.finished for runner in self.runners)
 
-        while self.finished < self.num_runners:
-            # Get random id and advance randomly
-            runner_id = randint(0,self.num_runners-1)
-            if self.runners[runner_id].finished:
-                continue
-            else:
-                self.runners[runner_id].advance(randint(1,3))
-                if self.runners[runner_id].get_x() >= self.screen.screensize()[0]: # Finished runner
-                    self.runners[runner_id].finished = True
-                    self.finished += 1
-                
-                if self.finished == self.num_runners: # Finished race
-                    if self.loop:
-                        self.__restart(x_start)
-            
-    def handler(self, signal_received, frame):
-        """
-        Handles what the program should do when it receives SIGINT (ctrl+C)
-        """
-        utils.full_clear()
-        if len(self.results) != 0:
-            if self.results_path != "":
-                try:
-                    self.__save_results()
-                except Exception:
-                    print("""\nERROR:{} Wrong path to results file. Could not
-                          save results file.""".format(self.results_path))
-        print("\nSEE YOU SOON!\n")
-        exit(0)
+        turtle.mainloop()
 
 def main(argv):
     # Default parameters
     num_runners = 5
-    track_size = 100
-    loop = False
-    save_path = ""
+    track_size = 700
 
     try:
-        opts, args = getopt.getopt(argv, "n:t:ls:f")
+        opts, _ = getopt.getopt(argv, "n:t:")
 
         for opt, arg in opts:
-            if opt in ("-l"):  # loop
-                loop = True
-            elif opt in ("-n"):  # num_runners
-                num_runners = arg
+            if opt in ("-n"):  # num_runners
+                num_runners = int(arg)
             elif opt in ("-t"):  # track_size
-                track_size = arg
-            elif opt in ("-s"):  # Save results
-                save_path = arg
-            elif opt in ("-f"):  # Fast start (testing comfort)
-                loop = True
-                # TODO: check path dir
-                #save_path = "results/fast_results.txt"
-
+                track_size = int(arg)
     except Exception:
         print("Something went wrong handling arguments")
         exit(0)
 
-    race = Race(num_runners, track_size, save_path, loop)
-   # signal(SIGINT, race.handler)
+    race = Race(num_runners, track_size)
     race.start()
 
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    try:
+        main(sys.argv[1:])
+    except KeyboardInterrupt as err:
+        print("\nProgram interrupted by user. Exiting...\n")
+        exit(0)

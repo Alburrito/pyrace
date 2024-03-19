@@ -2,16 +2,15 @@ from turtle import Turtle
 
 class Runner:
 
-    def __init__(self, runner_id, speed=0, color='black'):
+    def __init__(self, runner_id:int, speed=0, color='black'):
         self.runner_id = runner_id
         self.finished = False
         self.runner= Turtle()
         self.runner.speed(speed)
         self.runner.color(color)
         self.runner.shape("turtle")
-        self.test = "hola"
 
-    def advance(self, length):
+    def advance(self, length: int):
         self.runner.forward(length)
 
     def restart(self, x, y):
@@ -28,9 +27,9 @@ class Runner:
 
 class TurtleRunner(Runner):
 
-    def __init_(self, runner_id, speed=0, color='black'):
-        super(runner_id, speed, color)
-        super.runner.shape("turtle")
+    def __init__(self, runner_id, speed=0, color='black'):
+        super().__init__(runner_id, speed, color)
+        self.runner.shape("turtle")
 
 
 
