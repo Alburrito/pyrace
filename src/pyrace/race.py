@@ -1,10 +1,11 @@
 import time
 import turtle
+import sys
 from random import randint
 from typing import List
-from music_player import MusicPlayer
-from runners import TurtleRunner
-from utils import get_next_color, TITLE, IMG_PATH, SCREENWIDTH, SCREENHEIGHT
+from .music_player import MusicPlayer
+from .runners import TurtleRunner
+from .utils import get_next_color, TITLE, IMG_PATH, SCREENWIDTH, SCREENHEIGHT
 
 
 class Race:
@@ -44,8 +45,8 @@ class Race:
 
         turtle.hideturtle()
 
-        # Countdown images
         self.__register_images()
+
 
     def __register_images(self):
         """Registers the images used in the race."""

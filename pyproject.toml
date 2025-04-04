@@ -1,0 +1,26 @@
+[project]
+name = "pyrace"
+version = "0.1.0"
+description = "Be the first turtle to reach the sea!"
+authors = [
+    {name = "Alvaro Martin López",email = "almarlop.dev@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "colorama (>=0.4.6,<0.5.0)",
+    "pydub (>=0.25.1,<0.26.0)",
+    "simpleaudio (>=1.0.4,<2.0.0)"
+]
+
+[tool.poetry]
+packages = [{include = "pyrace", from = "src"}]
+
+
+[tool.poetry.group.dev.dependencies]
+ipdb = "^0.13.13"
+black = "^25.1.0"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

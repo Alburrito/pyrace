@@ -1,6 +1,5 @@
 from turtle import Turtle
-
-from utils import IMG_PATH
+from .utils import IMG_PATH
 
 
 class Runner:

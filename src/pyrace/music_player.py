@@ -1,7 +1,7 @@
 from pydub import AudioSegment
 from pydub.playback import _play_with_simpleaudio
 import threading
-from utils import SOUND_PATH
+from .utils import SOUND_PATH
 
 
 class MusicPlayer:

@@ -1,6 +1,6 @@
 import signal
 import sys
-from race import Race
+from .race import Race
 
 
 def handle_exit_signal(signum, frame):
