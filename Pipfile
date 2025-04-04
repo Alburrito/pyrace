@@ -5,9 +5,12 @@ name = "pypi"
 
 [packages]
 colorama = "*"
+pydub = "*"
+simpleaudio = "*"
 
 [dev-packages]
 ipdb = "*"
+black = "*"
 
 [requires]
 python_version = "3.10"
